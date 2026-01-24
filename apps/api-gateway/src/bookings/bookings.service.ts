@@ -22,6 +22,6 @@ export class BookingsService {
   }
 
   createBooking(bookingData: { userId: string; date: string }) {
-    return this.client.emit('create_booking', bookingData);
+    return this.client.send('create_booking', bookingData);
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 
 @Controller('bookings')
@@ -7,16 +7,10 @@ export class BookingsController {
   @Post()
   createBooking(@Body() createBookingDto: { date: string; userId: string }) {
     try {
-      this.bookingService.createBooking(createBookingDto);
-      return {
-        message: 'Booking created successfully',
-        booking: createBookingDto,
-      };
+      return this.bookingService.createBooking(createBookingDto);
     } catch (error) {
-      throw new HttpException(
-        'Failed to create booking with error' + error,
-        500,
-      );
+      //eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new BadRequestException(error.message);
     }
   }
 }
