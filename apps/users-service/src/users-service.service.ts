@@ -26,6 +26,7 @@ export class UsersServiceService {
     } else {
       throw new Error('Password is required');
     }
+    console.log('Creating user with email:', email);
     const user = await this.prisma.user.create({
       data: {
         email,
@@ -55,7 +56,7 @@ export class UsersServiceService {
     return user;
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     const user = await this.prisma.user.findUnique({
       omit: {
         passwordHash: true,

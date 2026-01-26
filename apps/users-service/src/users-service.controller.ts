@@ -19,7 +19,7 @@ export class UsersServiceController {
 
   @MessagePattern({ cmd: 'update_user' })
   updateUser(
-    @Payload() data: { id: number; updateData: Partial<CreateUserDto> },
+    @Payload() data: { id: string; updateData: Partial<CreateUserDto> },
   ) {
     return {
       message: 'This action updates a #${data.id} user',
@@ -33,7 +33,7 @@ export class UsersServiceController {
   }
 
   @MessagePattern({ cmd: 'user.find_by_id' })
-  findById(@Payload() id: number) {
+  findById(@Payload() id: string) {
     return this.usersServiceService.findById(id);
   }
 }

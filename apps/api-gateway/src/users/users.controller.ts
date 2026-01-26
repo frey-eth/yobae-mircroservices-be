@@ -42,13 +42,8 @@ export class UsersController {
     }
     try {
       if (id) {
-        const userId = Number(id);
-        if (Number.isNaN(userId)) {
-          throw new BadRequestException('id must be a number');
-        }
-
         return await firstValueFrom(
-          this.usersServiceClient.send({ cmd: 'user.find_by_id' }, userId),
+          this.usersServiceClient.send({ cmd: 'user.find_by_id' }, id),
         );
       }
       return await firstValueFrom(
