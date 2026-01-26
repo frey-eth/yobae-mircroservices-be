@@ -17,6 +17,16 @@ export class UsersServiceController {
     return this.usersServiceService.createUser(data);
   }
 
+  @MessagePattern({ cmd: 'update_user' })
+  updateUser(
+    @Payload() data: { id: number; updateData: Partial<CreateUserDto> },
+  ) {
+    return {
+      message: 'This action updates a #${data.id} user',
+      data,
+    };
+  }
+
   @MessagePattern({ cmd: 'user.find_by_email' })
   findByEmail(@Payload() email: string) {
     return this.usersServiceService.findByEmail(email);
