@@ -5,16 +5,18 @@ import { AppService } from './app.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UsersController } from './users/users.controller';
 import { BookingsModule } from './bookings/bookings.module';
+import { join } from 'node:path';
 
 @Module({
   imports: [
     ClientsModule.register([
+      // Users Service Microservice Client
       {
         name: MICROSERVICE_CLIENTS.USERS_SERVICE,
         transport: Transport.TCP,
         options: { port: 4001 },
       },
-
+      // Bookings Service Microservice Client
       {
         name: MICROSERVICE_CLIENTS.BOOKINGS_SERVICE,
         transport: Transport.RMQ,
@@ -24,6 +26,15 @@ import { BookingsModule } from './bookings/bookings.module';
           queueOptions: {
             durable: true,
           },
+        },
+      },
+      // Auth Service Microservice Client
+      {
+        name: MICROSERVICE_CLIENTS.AUTH_SERVICE,
+        transport: Transport.GRPC,
+        options: {
+          package: 'auth',
+          protoPath: join(process.cwd(), 'shared/proto/auth.proto'),
         },
       },
     ]),

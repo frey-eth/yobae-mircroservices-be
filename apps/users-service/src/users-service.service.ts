@@ -62,6 +62,7 @@ export class UsersServiceService {
       },
       where: { id },
     });
+
     if (!user) {
       throw new RpcException('User not found');
     }

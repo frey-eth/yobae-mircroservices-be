@@ -18,10 +18,10 @@ model User {
   email String @unique
   name String?
   passwordHash String
-  gender GENDER?
+  gender GENDER? @default(OTHER)
+  role USER_ROLE @default(CUSTOMER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
-
   @@index([name])
 }
 
@@ -30,3 +30,10 @@ enum GENDER {
   FEMALE
   OTHER
 }
+
+
+enum USER_ROLE {
+  PROVIDER
+  CUSTOMER
+}
+

@@ -1,10 +1,10 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpException,
   Inject,
-  ParseIntPipe,
   Post,
   Query,
 } from '@nestjs/common';
@@ -27,31 +27,51 @@ export class UsersController {
         this.usersServiceClient.send({ cmd: 'create_user' }, createUserDto),
       );
     } catch (error) {
-      console.log(error);
-      throw new HttpException('Failed to create user', 400);
+      //eslint-disable-next-line
+      throw new HttpException(error?.message || 'Failed', 400);
     }
   }
 
   @Get()
   async getUser(
-    @Query('id', ParseIntPipe) id?: number,
+    @Query('id') id?: string,
     @Query('email') email?: string,
   ): Promise<any> {
+    if (!id && !email) {
+      throw new BadRequestException('id or email query parameter is required');
+    }
     try {
-      if (!id && !email) {
-        throw new HttpException('id or email query parameter is required', 400);
-      }
       if (id) {
+        const userId = Number(id);
+        if (Number.isNaN(userId)) {
+          throw new BadRequestException('id must be a number');
+        }
+
         return await firstValueFrom(
-          this.usersServiceClient.send({ cmd: 'find_user_by_id' }, id),
-        );
-      } else {
-        return await firstValueFrom(
-          this.usersServiceClient.send({ cmd: 'find_user_by_email' }, email),
+          this.usersServiceClient.send({ cmd: 'user.find_by_id' }, userId),
         );
       }
+      return await firstValueFrom(
+        this.usersServiceClient.send(
+          { cmd: 'user.find_by_email' },
+          email?.toLowerCase(),
+        ),
+      );
     } catch (error) {
-      throw new HttpException('Failed to get user' + error, 400);
+      //eslint-disable-next-line
+      throw new HttpException(error?.message || 'Failed', 400);
+    }
+  }
+
+  @Get('/all')
+  async getAllUsers(): Promise<any> {
+    try {
+      return await firstValueFrom(
+        this.usersServiceClient.send({ cmd: 'user.find_all' }, {}),
+      );
+    } catch (error) {
+      //eslint-disable-next-line
+      throw new HttpException(error?.message || 'Failed', 400);
     }
   }
 }
