@@ -24,6 +24,7 @@ async function bootstrap() {
       exceptionFactory: (errors) => new RpcException(errors),
     }),
   );
+
   console.log('User service is listening on port 4001');
   await app.listen();
 }

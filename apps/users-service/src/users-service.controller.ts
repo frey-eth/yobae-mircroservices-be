@@ -17,12 +17,12 @@ export class UsersServiceController {
     return this.usersServiceService.createUser(data);
   }
 
-  @MessagePattern({ cmd: 'find_user_by_email' })
+  @MessagePattern({ cmd: 'user.find_by_email' })
   findByEmail(@Payload() email: string) {
     return this.usersServiceService.findByEmail(email);
   }
 
-  @MessagePattern({ cmd: 'find_user_by_id' })
+  @MessagePattern({ cmd: 'user.find_by_id' })
   findById(@Payload() id: number) {
     return this.usersServiceService.findById(id);
   }
