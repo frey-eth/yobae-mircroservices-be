@@ -1,6 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { UsersServiceModule } from './users-service.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import {
+  MicroserviceOptions,
+  RpcException,
+  Transport,
+} from '@nestjs/microservices';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -12,7 +17,16 @@ async function bootstrap() {
       },
     },
   );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      exceptionFactory: (errors) => new RpcException(errors),
+    }),
+  );
   console.log('User service is listening on port 4001');
   await app.listen();
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Error starting User service:', err);
+});

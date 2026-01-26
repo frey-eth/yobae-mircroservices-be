@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { UsersServiceService } from './users-service.service';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { CreateUserDto } from 'shared/dto/create-user.dto';
 
 @Controller()
 export class UsersServiceController {
@@ -12,10 +13,17 @@ export class UsersServiceController {
   }
 
   @MessagePattern({ cmd: 'create_user' })
-  createUser(data: { name: string; email: string }) {
-    return {
-      message: 'User created successfully',
-      user: data,
-    };
+  createUser(@Payload() data: CreateUserDto) {
+    return this.usersServiceService.createUser(data);
+  }
+
+  @MessagePattern({ cmd: 'find_user_by_email' })
+  findByEmail(@Payload() email: string) {
+    return this.usersServiceService.findByEmail(email);
+  }
+
+  @MessagePattern({ cmd: 'find_user_by_id' })
+  findById(@Payload() id: number) {
+    return this.usersServiceService.findById(id);
   }
 }
