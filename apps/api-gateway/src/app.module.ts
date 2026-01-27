@@ -1,22 +1,13 @@
 import { MICROSERVICE_CLIENTS } from 'apps/api-gateway/constant';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { UsersController } from './users/users.controller';
 import { BookingsModule } from './bookings/bookings.module';
-import { join } from 'node:path';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
     ClientsModule.register([
-      // Users Service Microservice Client
-      {
-        name: MICROSERVICE_CLIENTS.USERS_SERVICE,
-        transport: Transport.TCP,
-        options: { port: 4001 },
-      },
-      // Bookings Service Microservice Client
       {
         name: MICROSERVICE_CLIENTS.BOOKINGS_SERVICE,
         transport: Transport.RMQ,
@@ -28,19 +19,12 @@ import { join } from 'node:path';
           },
         },
       },
-      // Auth Service Microservice Client
-      {
-        name: MICROSERVICE_CLIENTS.AUTH_SERVICE,
-        transport: Transport.GRPC,
-        options: {
-          package: 'auth',
-          protoPath: join(process.cwd(), 'shared/proto/auth.proto'),
-        },
-      },
     ]),
+    UsersModule,
     BookingsModule,
+    AuthModule,
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

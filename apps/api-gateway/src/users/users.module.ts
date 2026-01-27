@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AuthServiceController } from './auth-service.controller';
-import { AuthServiceService } from './auth-service.service';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MICROSERVICE_CLIENTS } from 'apps/api-gateway/constant';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -14,12 +13,8 @@ import { JwtModule } from '@nestjs/jwt';
         options: { port: 4001 },
       },
     ]),
-    JwtModule.register({
-      global: true,
-      secret: 'TEST_SECRET_KEY',
-    }),
   ],
-  controllers: [AuthServiceController],
-  providers: [AuthServiceService],
+  providers: [UsersService],
+  controllers: [UsersController],
 })
-export class AuthServiceModule {}
+export class UsersModule {}
