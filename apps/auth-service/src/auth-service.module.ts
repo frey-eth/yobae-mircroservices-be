@@ -4,6 +4,7 @@ import { AuthServiceService } from './auth-service.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MICROSERVICE_CLIENTS } from 'apps/api-gateway/constant';
 import { JwtModule } from '@nestjs/jwt';
+import { JWT_SECRET } from 'shared/constants/jwt-constant';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
     ]),
     JwtModule.register({
       global: true,
-      secret: 'TEST_SECRET_KEY',
+      secret: JWT_SECRET,
     }),
   ],
   controllers: [AuthServiceController],

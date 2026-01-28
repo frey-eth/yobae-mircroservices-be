@@ -1,7 +1,18 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 
 import { CreateUserDto } from 'shared/dto/create-user.dto';
 import { UsersService } from './users.service';
+import { AuthGuard } from 'shared/guard/auth.guard';
+import { JwtPayload } from 'shared/types';
+import { Request } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -12,8 +23,18 @@ export class UsersController {
     return this.userService.createUser(createUserDto);
   }
 
-  @Get()
-  async getUser(@Query('id') id: string): Promise<any> {
+  @Get('/me')
+  @UseGuards(AuthGuard)
+  async getMe(@Req() req: Request): Promise<any> {
+    return this.userService.getUser(req.user?.id as string);
+  }
+
+  @Get('/:id')
+  async getUser(@Param('id') id: string): Promise<any> {
     return this.userService.getUser(id);
   }
+}
+
+export interface RequestWithUser extends Request {
+  user?: JwtPayload;
 }

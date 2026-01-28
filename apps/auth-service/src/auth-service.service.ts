@@ -27,7 +27,7 @@ export class AuthServiceService {
       throw new RpcException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email, role: user.role };
 
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
@@ -38,7 +38,11 @@ export class AuthServiceService {
   refreshToken(refreshToken: string) {
     try {
       const decoded: JwtPayload = this.jwtService.verify(refreshToken);
-      const payload = { sub: decoded.sub, email: decoded.email };
+      const payload = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+      };
       return {
         accessToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
         refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),

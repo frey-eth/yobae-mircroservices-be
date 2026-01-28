@@ -21,8 +21,10 @@ export class AuthService implements OnModuleInit {
   }
 
   async refreshToken(refreshToken: string) {
-    return await firstValueFrom(
-      this.authService.refreshToken({ refreshToken }),
-    );
+    {
+      return await firstValueFrom(
+        this.authService.refreshToken({ refreshToken }),
+      );
+    }
   }
 }

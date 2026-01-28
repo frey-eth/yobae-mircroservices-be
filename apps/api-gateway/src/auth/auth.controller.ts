@@ -49,12 +49,16 @@ export class AuthController {
       );
     }
     const result = await this.authService.refreshToken(refreshToken as string);
+    if (!result) {
+      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
+    }
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
     return {
       message: 'Token refreshed successfully',
       accessToken: result.accessToken,
