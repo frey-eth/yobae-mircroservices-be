@@ -24,6 +24,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mongodb:
+    container_name: 'mongodb'
+    image: 'arm64v8/mongo:6.0'
+    platform: 'linux/arm64/v8'
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
 volumes:
   rabbitmq_data:
   postgres_data:
+  mongodb_data:

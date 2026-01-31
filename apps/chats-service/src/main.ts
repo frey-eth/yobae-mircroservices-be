@@ -3,6 +3,8 @@ import { ChatsServiceModule } from './chats-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(ChatsServiceModule);
-  await app.listen(process.env.port ?? 3000);
+  app.enableCors({ origin: true });
+  await app.listen(8386);
+  console.log('Chats Service is listening on ', await app.getUrl());
 }
 bootstrap();
