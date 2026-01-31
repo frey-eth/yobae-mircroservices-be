@@ -32,7 +32,17 @@ services:
       - '27017:27017'
     volumes:
       - mongodb_data:/data/db
+
+  redis:
+    container_name: 'redis'
+    image: 'redis:7-alpine'
+    ports:
+      - '6379:6379'
+    restart: always
+    volumes:
+      - redis_data:/data
 volumes:
   rabbitmq_data:
   postgres_data:
   mongodb_data:
+  redis_data:
