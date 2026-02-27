@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { MICROSERVICE_CLIENTS } from 'apps/api-gateway/constant';
+import { User } from 'apps/users-service/generated/prisma/client';
 import { firstValueFrom } from 'rxjs';
 import { CreateUserDto } from 'shared/dto/create-user.dto';
 
@@ -15,14 +16,16 @@ export class UsersService {
     @Inject(MICROSERVICE_CLIENTS.USERS_SERVICE)
     private readonly usersServiceClient: ClientProxy,
   ) {}
-  async createUser(createUserDto: CreateUserDto): Promise<any> {
+  async createUser(
+    createUserDto: CreateUserDto,
+  ): Promise<{ user: User; status: string }> {
     try {
       return await firstValueFrom(
         this.usersServiceClient.send({ cmd: 'create_user' }, createUserDto),
       );
     } catch (error) {
       //eslint-disable-next-line
-      throw new HttpException(error?.message || 'Failed', 400);
+      throw new HttpException(error || 'Failed', 400);
     }
   }
 

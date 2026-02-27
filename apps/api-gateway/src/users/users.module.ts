@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MICROSERVICE_CLIENTS } from 'apps/api-gateway/constant';
+import { UsersResolver } from './users.resolver';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { MICROSERVICE_CLIENTS } from 'apps/api-gateway/constant';
       },
     ]),
   ],
-  providers: [UsersService],
+  providers: [UsersService, UsersResolver],
   controllers: [UsersController],
 })
 export class UsersModule {}

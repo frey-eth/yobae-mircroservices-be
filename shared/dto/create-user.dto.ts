@@ -1,3 +1,4 @@
+import { Field, InputType } from '@nestjs/graphql';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
@@ -13,20 +14,25 @@ export enum GENDER {
   OTHER = 'OTHER',
 }
 
+@InputType()
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  @Field()
+  name!: string;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   @Transform(({ value }) => value?.toLowerCase())
   @IsEmail()
-  email: string;
+  @Field()
+  email!: string;
 
   @IsString()
   @MinLength(6)
-  password: string;
+  @Field()
+  password!: string;
 
   @IsEnum(GENDER)
-  gender: GENDER;
+  @Field()
+  gender!: GENDER;
 }
