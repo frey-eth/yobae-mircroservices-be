@@ -1,6 +1,8 @@
 import { Controller } from '@nestjs/common';
-import { BookingsServiceService } from './bookings-service.service';
+import { Payload } from '@nestjs/microservices';
 import { MessagePattern } from '@nestjs/microservices';
+import { BookingsServiceService } from './bookings-service.service';
+import type { CreateBookingInput } from './bookings-service.service';
 
 @Controller()
 export class BookingsServiceController {
@@ -9,7 +11,7 @@ export class BookingsServiceController {
   ) {}
 
   @MessagePattern('create_booking')
-  createBooking(data: { date: string; userId: string }) {
+  createBooking(@Payload() data: CreateBookingInput) {
     return this.bookingsServiceService.createBooking(data);
   }
 }

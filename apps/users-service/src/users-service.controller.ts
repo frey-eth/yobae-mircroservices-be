@@ -1,39 +1,49 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { UsersServiceService } from './users-service.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CreateUserDto } from 'shared/dto/create-user.dto';
+import { GrpcMethod } from '@nestjs/microservices';
+import { GENDER } from 'shared/dto/create-user.dto';
 
 @Controller()
 export class UsersServiceController {
   constructor(private readonly usersServiceService: UsersServiceService) {}
 
-  @Get()
-  getHello(): string {
-    return this.usersServiceService.getHello();
+  @GrpcMethod('UserService', 'CreateUser')
+  createUser(data: {
+    name: string;
+    email: string;
+    password: string;
+    gender: string;
+  }) {
+    return this.usersServiceService.createUser({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      gender: data.gender as GENDER,
+    });
   }
 
-  @MessagePattern({ cmd: 'create_user' })
-  createUser(@Payload() data: CreateUserDto) {
-    return this.usersServiceService.createUser(data);
-  }
-
-  @MessagePattern({ cmd: 'update_user' })
-  updateUser(
-    @Payload() data: { id: string; updateData: Partial<CreateUserDto> },
-  ) {
+  @GrpcMethod('UserService', 'UpdateUser')
+  updateUser(data: {
+    id: string;
+    name?: string;
+    email?: string;
+    password?: string;
+    gender?: string;
+  }) {
     return {
-      message: 'This action updates a #${data.id} user',
-      data,
+      message: `This action updates a #${data.id} user`,
     };
   }
 
-  @MessagePattern({ cmd: 'user.find_by_email' })
-  findByEmail(@Payload() email: string) {
-    return this.usersServiceService.findByEmail(email);
+  @GrpcMethod('UserService', 'FindByEmail')
+  async findByEmail(data: { email: string }) {
+    const user = await this.usersServiceService.findByEmail(data.email);
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
-  @MessagePattern({ cmd: 'user.find_by_id' })
-  findById(@Payload() id: string) {
-    return this.usersServiceService.findById(id);
+  @GrpcMethod('UserService', 'FindById')
+  findById(data: { id: string }) {
+    return this.usersServiceService.findById(data.id);
   }
 }

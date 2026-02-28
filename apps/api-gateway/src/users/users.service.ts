@@ -3,43 +3,58 @@ import {
   HttpException,
   Inject,
   Injectable,
+  OnModuleInit,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import { MICROSERVICE_CLIENTS } from 'apps/api-gateway/constant';
-import { User } from 'apps/users-service/generated/prisma/client';
 import { firstValueFrom } from 'rxjs';
 import { CreateUserDto } from 'shared/dto/create-user.dto';
+import { UsersGrpcService } from 'shared/proto/services-interface';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
+  private usersGrpcService: UsersGrpcService;
+
   constructor(
     @Inject(MICROSERVICE_CLIENTS.USERS_SERVICE)
-    private readonly usersServiceClient: ClientProxy,
+    private readonly client: ClientGrpc,
   ) {}
-  async createUser(
-    createUserDto: CreateUserDto,
-  ): Promise<{ user: User; status: string }> {
+
+  onModuleInit() {
+    this.usersGrpcService =
+      this.client.getService<UsersGrpcService>('UserService');
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<any> {
     try {
       return await firstValueFrom(
-        this.usersServiceClient.send({ cmd: 'create_user' }, createUserDto),
+        this.usersGrpcService.createUser({
+          name: createUserDto.name,
+          email: createUserDto.email,
+          password: createUserDto.password,
+          gender: createUserDto.gender,
+        }),
       );
-    } catch (error) {
-      //eslint-disable-next-line
-      throw new HttpException(error || 'Failed', 400);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed';
+      throw new HttpException(message, 400);
     }
   }
 
-  async getUser(id: string): Promise<any> {
+  async getUser(id: string): Promise<{
+    id: string;
+    email: string;
+    name: string;
+    gender: string;
+  }> {
     if (!id) {
       throw new BadRequestException('id or email query parameter is required');
     }
     try {
-      return await firstValueFrom(
-        this.usersServiceClient.send({ cmd: 'user.find_by_id' }, id),
-      );
-    } catch (error) {
-      //eslint-disable-next-line
-      throw new HttpException(error?.message || 'Failed', 400);
+      return await firstValueFrom(this.usersGrpcService.findById({ id }));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed';
+      throw new HttpException(message, 400);
     }
   }
 }

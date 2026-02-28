@@ -32,7 +32,9 @@ export class UsersResolver {
   async createUser(
     @Args('createUserDto') createUserDto: CreateUserDto,
   ): Promise<any> {
-    const { user } = await this.userService.createUser(createUserDto);
+    const { user } = (await this.userService.createUser(createUserDto)) as {
+      user: User;
+    };
     return user;
   }
 }

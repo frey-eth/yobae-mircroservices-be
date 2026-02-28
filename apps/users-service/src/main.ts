@@ -6,14 +6,17 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
+import { join } from 'node:path';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     UsersServiceModule,
     {
-      transport: Transport.TCP,
+      transport: Transport.GRPC,
       options: {
-        port: 4001,
+        url: 'localhost:50052',
+        package: 'user',
+        protoPath: join(process.cwd(), 'shared/proto/user.proto'),
       },
     },
   );
@@ -25,7 +28,7 @@ async function bootstrap() {
     }),
   );
 
-  console.log('User service is listening on port 4001');
+  console.log('User service is listening on localhost:50052 (gRPC)');
   await app.listen();
 }
 bootstrap().catch((err) => {

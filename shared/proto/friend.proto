@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package friend;
+
+service FriendService {
+  rpc GetFriend (GetFriendRequest) returns (Friend);
+  rpc ListFriends (ListFriendsRequest) returns (ListFriendsResponse);
+  rpc ReserveSlot (ReserveSlotRequest) returns (ReserveSlotResponse);
+  rpc ReleaseSlot (ReleaseSlotRequest) returns (ReleaseSlotResponse);
+  rpc GetSlotPricing (GetSlotPricingRequest) returns (GetSlotPricingResponse);
+}
+
+message GetFriendRequest {
+  string id = 1;
+}
+
+message ListFriendsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string city = 3;
+  string sort = 4;
+}
+
+message Friend {
+  string id = 1;
+  string user_id = 2;
+  string display_name = 3;
+  string bio = 4;
+  string location_city = 5;
+  double price_per_hour = 6;
+  bool is_active = 7;
+}
+
+message Slot {
+  string id = 1;
+  string friend_id = 2;
+  string start_at = 3;
+  string end_at = 4;
+  string status = 5;
+}
+
+message ListFriendsResponse {
+  repeated Friend friends = 1;
+  int32 total = 2;
+}
+
+message ReserveSlotRequest {
+  string slot_id = 1;
+  string booking_id = 2;
+  string idempotency_key = 3;
+}
+
+message ReserveSlotResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReleaseSlotRequest {
+  string slot_id = 1;
+  string booking_id = 2;
+}
+
+message ReleaseSlotResponse {
+  bool success = 1;
+}
+
+message GetSlotPricingRequest {
+  string slot_id = 1;
+  string friend_id = 2;
+}
+
+message GetSlotPricingResponse {
+  double amount = 1;
+  string currency = 2;
+}

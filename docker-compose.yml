@@ -1,46 +1,120 @@
-version: '3'
+# Full infra + optional app services. Run infra: docker-compose up -d
+# Run apps locally with: nest start api-gateway, nest start users-service, etc.
+# Or build and run all: docker-compose --profile apps up -d (see profile below)
+version: '3.9'
+
 services:
   rabbitmq:
-    container_name: 'rabbitmq'
-    image: 'rabbitmq:4.1.8-management'
+    container_name: rabbitmq
+    image: rabbitmq:4.1.8-management
     ports:
       - '5672:5672'
       - '15672:15672'
     environment:
-      RABBITMQ_DEFAULT_USER: 'user'
-      RABBITMQ_DEFAULT_PASS: 'password'
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
-    container_name: 'postgres'
-    image: 'postgres:16-alpine'
+    container_name: postgres
+    image: postgres:16-alpine
     environment:
-      POSTGRES_USER: 'user'
-      POSTGRES_PASSWORD: 'password'
-      POSTGRES_DB: 'yobaedb'
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: yobaedb
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U user -d yobaedb']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   mongodb:
-    container_name: 'mongodb'
-    image: 'arm64v8/mongo:6.0'
-    platform: 'linux/arm64/v8'
+    container_name: mongodb
+    image: arm64v8/mongo:6.0
+    platform: linux/arm64/v8
     ports:
       - '27017:27017'
     volumes:
       - mongodb_data:/data/db
 
   redis:
-    container_name: 'redis'
-    image: 'redis:7-alpine'
+    container_name: redis
+    image: redis:7-alpine
     ports:
       - '6379:6379'
     restart: always
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Optional: run all apps in Docker (build from monorepo root)
+  api-gateway:
+    build: { context: ., dockerfile: Dockerfile.multi, args: { APP: api-gateway } }
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://user:password@postgres:5432/yobaedb
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    profiles: [apps]
+
+  users-service:
+    build: { context: ., dockerfile: Dockerfile.multi, args: { APP: users-service } }
+    environment:
+      GRPC_URL: 0.0.0.0:50052
+      DATABASE_URL: postgresql://user:password@postgres:5432/yobaedb
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    profiles: [apps]
+
+  bookings-service:
+    build: { context: ., dockerfile: Dockerfile.multi, args: { APP: bookings-service } }
+    environment:
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+      USER_GRPC_URL: users-service:50052
+      PAYMENT_GRPC_URL: payment-service:50054
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+    profiles: [apps]
+
+  payment-service:
+    build: { context: ., dockerfile: Dockerfile.multi, args: { APP: payment-service } }
+    environment:
+      GRPC_URL: 0.0.0.0:50054
+      DATABASE_URL: postgresql://user:password@postgres:5432/yobaedb
+    depends_on:
+      postgres: { condition: service_healthy }
+    profiles: [apps]
+
+  notifications-service:
+    build: { context: ., dockerfile: Dockerfile.multi, args: { APP: notifications-service } }
+    environment:
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+    profiles: [apps]
+
 volumes:
   rabbitmq_data:
   postgres_data:

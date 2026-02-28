@@ -1,0 +1,16 @@
+# Build and run one Nest app from monorepo. Usage: docker build -f Dockerfile.multi --build-arg APP=api-gateway .
+FROM node:20-alpine AS base
+WORKDIR /app
+ARG APP
+ENV APP=${APP}
+
+# Install deps
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy source and shared
+COPY . .
+RUN npx nest build "${APP}"
+
+# APP is baked in at build time via ENV
+CMD ["sh", "-c", "node dist/apps/$APP/main.js"]

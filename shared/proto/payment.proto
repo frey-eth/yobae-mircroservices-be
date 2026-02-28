@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package payment;
+
+service PaymentService {
+  rpc DeductBalance (DeductBalanceRequest) returns (DeductBalanceResponse);
+  rpc Refund (RefundRequest) returns (RefundResponse);
+  rpc GetTransactionHistory (GetTransactionHistoryRequest) returns (GetTransactionHistoryResponse);
+}
+
+message DeductBalanceRequest {
+  string user_id = 1;
+  double amount = 2;
+  string booking_id = 3;
+  string idempotency_key = 4;
+}
+
+message DeductBalanceResponse {
+  bool success = 1;
+  string payment_id = 2;
+  string message = 3;
+}
+
+message RefundRequest {
+  string payment_id = 1;
+  string booking_id = 2;
+  string idempotency_key = 3;
+}
+
+message RefundResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetTransactionHistoryRequest {
+  string user_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message TransactionRecord {
+  string id = 1;
+  string user_id = 2;
+  double amount = 3;
+  string type = 4;
+  string reference_id = 5;
+  string created_at = 6;
+}
+
+message GetTransactionHistoryResponse {
+  repeated TransactionRecord transactions = 1;
+  int32 total = 2;
+}

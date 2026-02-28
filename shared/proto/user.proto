@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
+  rpc FindByEmail (FindByEmailRequest) returns (User);
+  rpc FindById (FindByIdRequest) returns (User);
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
+  rpc GetKycStatus (GetKycStatusRequest) returns (GetKycStatusResponse);
+}
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  string gender = 4;
+}
+
+message CreateUserResponse {
+  string status = 1;
+  User user = 2;
+}
+
+message UpdateUserRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string email = 3;
+  optional string password = 4;
+  optional string gender = 5;
+}
+
+message UpdateUserResponse {
+  string message = 1;
+}
+
+message FindByEmailRequest {
+  string email = 1;
+}
+
+message FindByIdRequest {
+  string id = 1;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string gender = 4;
+  double balance = 5;
+  string kyc_status = 6;
+  double price_per_hour = 7;  // for users who can be booked (hangout)
+}
+
+message GetBalanceRequest {
+  string user_id = 1;
+}
+
+message GetBalanceResponse {
+  double balance = 1;
+}
+
+message GetKycStatusRequest {
+  string user_id = 1;
+}
+
+message GetKycStatusResponse {
+  string status = 1;
+}
